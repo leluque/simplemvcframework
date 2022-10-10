@@ -1,6 +1,10 @@
 # Java
 target
 
+# NodeJS
+node_modules
+package-lock.json
+
 # IntelliJ
 *.iml
 .idea
