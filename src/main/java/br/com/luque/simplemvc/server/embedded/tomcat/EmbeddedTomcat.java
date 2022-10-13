@@ -1,5 +1,6 @@
-package br.com.luque.simplemvc.server.embedded;
+package br.com.luque.simplemvc.server.embedded.tomcat;
 
+import br.com.luque.simplemvc.server.embedded.EmbeddedServer;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.core.StandardContext;
@@ -8,21 +9,18 @@ import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
 
 import java.io.File;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
-public class EmbeddedTomcat {
+public class EmbeddedTomcat implements EmbeddedServer {
 
-    public void start() {
+    private static final Logger logger = Logger.getLogger(EmbeddedTomcat.class.getName());
 
-        String webappDirLocation = "src/main/webapp/";
-
+    public void start(String webappDirLocation, int port) {
         Tomcat tomcat = new Tomcat();
-        String webPort = System.getenv("PORT");
-        if (webPort == null || webPort.isEmpty()) {
-            webPort = "8080";
-        }
-        tomcat.setPort(Integer.parseInt(webPort));
+        tomcat.setPort(port);
 
-        System.out.println("Configuring app with basedir: " + new File("./" + webappDirLocation).getAbsolutePath() + "...");
+        logger.info("Configuring webapp with base dir: " + new File("./" + webappDirLocation).getAbsolutePath() + "...");
 
         StandardContext ctx = (StandardContext) tomcat.addWebapp("", new File(webappDirLocation).getAbsolutePath());
         File additionWebInfClasses = new File("target/classes");
@@ -33,10 +31,10 @@ public class EmbeddedTomcat {
         tomcat.getConnector();
 
         try {
-            System.out.println("Starting Tomcat...");
+            logger.info("Starting Tomcat...");
             tomcat.start();
         } catch (LifecycleException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "An error happened while starting the embedded Tomcat", e);
         }
         tomcat.getServer().await();
 
